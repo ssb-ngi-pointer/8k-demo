@@ -22,7 +22,10 @@
     "apps/*.js"
   ],
   "dependencies": {
+    "sodium-universal": "^3.0.4",
     "ssb-browser-core": "^11.3.0",
+    "ssb-db2": "github:ssb-ngi-pointer/ssb-db2#support-bendy-butt-box2",
+    "ssb-db2-box2": "^0.2.0",
     "ssb-meta-feeds": "^0.24.0",
     "vue": "^2.6.14"
   },
