@@ -37,7 +37,7 @@ let config = {
 }
 
 // setup ssb browser core
-ssbSingleton.setup("/.ssb-8k", config, extraModules, () => {})
+ssbSingleton.setup("/.ssb-8k", config, extraModules)
 
 ssbSingleton.getSSBEventually(
   -1,
