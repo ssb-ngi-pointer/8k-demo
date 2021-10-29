@@ -9,6 +9,7 @@ const source = require('./source')
 function extraModules(secretStack) {
   return secretStack
     .use(require("ssb-meta-feeds"))
+    .use(require("ssb-db2-box2"))
 }
 
 let config = {
@@ -29,11 +30,14 @@ let config = {
   },
   blobs: {
     max: 10 * 1024 * 1024
+  },
+  box2: {
+    alwaysbox2: true
   }
 }
 
 // setup ssb browser core
-ssbSingleton.setup("/.ssb-8k", config, extraModules, () => {})
+ssbSingleton.setup("/.ssb-8k", config, extraModules)
 
 ssbSingleton.getSSBEventually(
   -1,
@@ -93,6 +97,51 @@ function getFunctionBody(f){
 function ssbReady(SSB) {
   //console.log("got sbot", SSB)
   //dumpDB()
+
+  const testkey = Buffer.from(
+    '30720d8f9cbf37f6d7062826f6decac93e308060a8aaaa77e6a4747f40ee1a76',
+    'hex'
+  )
+
+  SSB.net.box2.addOwnDMKey(testkey)
+  SSB.net.box2.setReady()  
+
+  // monkey patch some methods
+  Uint8Array.prototype.equals = function equals (b) {
+    let a = this
+
+    if (a === b) {
+      return true
+    }
+
+    if (a.byteLength !== b.byteLength) {
+      return false
+    }
+
+    for (let i = 0; i < a.byteLength; i++) {
+      if (a[i] !== b[i]) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  Uint8Array.prototype.copy = function equals (b) {
+    let a = this
+    for (let i = 0; i < a.length; ++i)
+      b[i] = a[i]
+  }
+
+  let content = { type: 'post', text: 'super secret', recps: [SSB.net.id] }
+
+  SSB.db.publish(content, (err, privateMsg) => {
+    console.log("encode", err, privateMsg)
+
+    SSB.db.get(privateMsg.key, (err, msg) => {
+      console.log("decode", msg.content.text)
+    })
+  })
 
   app.id = SSB.net.id
 
